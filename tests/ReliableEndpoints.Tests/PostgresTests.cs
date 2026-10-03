@@ -5,12 +5,11 @@ namespace ReliableEndpoints.Tests;
 
 public sealed class PostgresTests
 {
-    [Fact]
+    [PostgresFact]
     [Trait("Category", "Postgres")]
     public async Task IndependentInstancesExcludeConcurrentExecutionAndReplayDurably()
     {
         var connectionString = Environment.GetEnvironmentVariable("RELIABLE_ENDPOINTS_POSTGRES");
-        Assert.False(string.IsNullOrWhiteSpace(connectionString), "Set RELIABLE_ENDPOINTS_POSTGRES or exclude Category=Postgres for unit tests.");
         await using var source = NpgsqlDataSource.Create(connectionString!);
         await using var first = new PostgresIdempotencyStore(source);
         await using var second = new PostgresIdempotencyStore(source);
@@ -36,5 +35,14 @@ public sealed class PostgresTests
         var next = await lockTwo.TryAcquireAsync(key, default);
         Assert.NotNull(next);
         await next!.DisposeAsync();
+    }
+}
+
+public sealed class PostgresFactAttribute : FactAttribute
+{
+    public PostgresFactAttribute()
+    {
+        if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("RELIABLE_ENDPOINTS_POSTGRES")))
+            Skip = "Set RELIABLE_ENDPOINTS_POSTGRES to run real PostgreSQL integration tests.";
     }
 }

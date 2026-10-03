@@ -113,13 +113,13 @@ Implement `IIdempotencyStore` with atomic acquisition, token-fenced completion a
 dotnet restore
 dotnet format --verify-no-changes --no-restore
 dotnet build -c Release --no-restore
-dotnet test -c Release --filter 'Category!=Postgres'
+dotnet test -c Release
 # To include real PostgreSQL integration tests:
 # set RELIABLE_ENDPOINTS_POSTGRES to a test database connection string, then:
 dotnet test -c Release
 dotnet pack src/ReliableEndpoints -c Release --no-build
 ```
 
-CI runs the same checks with PostgreSQL 16. Compiler and .NET analyzers treat warnings as errors. Tests cover replay, concurrency, fingerprint conflicts, tenant isolation, timeout cleanup, server errors, payload limits, token ownership, expiration, retries and locks. Integration tests require the environment variable rather than silently passing without a backend. The development database should be disposable.
+CI runs the same checks with PostgreSQL 16. Compiler and .NET analyzers treat warnings as errors. Tests cover replay, concurrency, fingerprint conflicts, tenant isolation, timeout cleanup, server errors, payload limits, token ownership, expiration, retries and locks. Without the environment variable, the PostgreSQL integration test is explicitly skipped; CI always sets it and runs the real backend. The development database should be disposable.
 
 MIT licensed. Contributions should include tests for changed behavior and pass the checks above.
